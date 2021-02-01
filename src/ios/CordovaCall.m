@@ -22,6 +22,7 @@ BOOL enableDTMF = NO;
     - (void)receiveCall:(CDVInvokedUrlCommand*)command;
     - (void)sendCall:(CDVInvokedUrlCommand*)command;
     - (void)connectCall:(CDVInvokedUrlCommand*)command;
+    - (void)customCall:(CDVInvokedUrlCommand*)command;
     - (void)endCall:(CDVInvokedUrlCommand*)command;
     - (void)registerEvent:(CDVInvokedUrlCommand*)command;
     - (void)mute:(CDVInvokedUrlCommand*)command;
@@ -247,16 +248,45 @@ BOOL enableDTMF = NO;
 {
     CDVPluginResult* pluginResult = nil;
     NSArray<CXCall *> *calls = self.callController.callObserver.calls;
-
+    NSLog(@"In code");
+    NSLog(@"%@",calls);
     if([calls count] == 1) {
+        if(calls[0].isOutgoing==YES&& calls[0].hasConnected == YES){
         [self.provider reportOutgoingCallWithUUID:calls[0].UUID connectedAtDate:nil];
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Call connected successfully"];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Call connected successfully"];}
+        else{
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No call exists for you to connect"];
+        }
     } else {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No call exists for you to connect"];
     }
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
+
+
+- (void)customCall:(CDVInvokedUrlCommand*)command
+{
+    
+    CDVPluginResult* pluginResult = nil;
+    NSArray<CXCall *> *calls = self.callController.callObserver.calls;
+    NSLog(@"In code");
+    NSLog(@"%@",calls);
+    if([calls count] == 1) {
+        if(calls[0].isOutgoing==NO&& calls[0].hasConnected == YES){
+        [self.provider reportOutgoingCallWithUUID:calls[0].UUID connectedAtDate:nil];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Call connected successfully"];}
+        else{
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No call exists for you to connect"];
+        }
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No call exists for you to connect"];
+    }
+
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+}
+
 
 - (void)endCall:(CDVInvokedUrlCommand*)command
 {
